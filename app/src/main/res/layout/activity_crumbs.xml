@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CrumbsActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        app:elevation="0dp">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:subtitle="Find your past Crumbs"
+            app:subtitleTextAppearance="@style/ToolbarSubtitleTheme"
+            app:title="@string/title_activity_crumbs"
+            app:titleTextAppearance="@style/ToolbarTitleTheme" />
+
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        app:backgroundTint="@color/colorBtnBackgroundSecondary"
+        app:srcCompat="@drawable/ic_add_crumb_24dp" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <!--
+        <ProgressBar
+            android:id="@+id/loading_data_progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/days_recycler"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />-->
+
+        <ng.petersabs.dev.crumby.DaysRecyclerView
+            android:id="@+id/days_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorPrimary"
+            tools:listitem="@layout/content_crumbs" />
+
+        <ImageButton
+            android:id="@+id/previous_button"
+            android:layout_width="48dp"
+            android:layout_height="96dp"
+            android:layout_centerVertical="true"
+            android:background="@drawable/back_button_background"
+            android:clickable="true"
+            android:contentDescription="@string/previous_day_btn_text"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            app:srcCompat="@drawable/ic_keyboard_arrow_left_64dp" />
+
+        <ImageButton
+            android:id="@+id/forward_button"
+            android:layout_width="48dp"
+            android:layout_height="96dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/forward_button_background"
+            android:clickable="true"
+            android:contentDescription="@string/next_day_btn_text"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_keyboard_arrow_right_64dp"
+            tools:visibility="visible" />
+    </RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>

@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">Crumby</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Username or Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="prompt_confirm_password">Confirm Password</string>
+    <string name="action_sign_in">LOG IN</string>
+    <string name="action_sign_up">SIGN UP</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">Incorrect details. Try again.</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="error_username_required">Please input a username or email</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="contenDesc">SplashScreen for app</string>
+    <string name="login_option">OR LOGIN WITH</string>
+    <string name="sign_up_option">OR SIGNUP WITH</string>
+    <string name="return_to_login">back to login</string>
+    <string name="action_sign_in_short">Login</string>
+    <string name="desc_choose_a_username">Choose a username</string>
+    <string name="prompt_for_name">Username</string>
+    <string name="prompt_for_email">Email</string>
+    <string name="desc_google_signin">sign in with google</string>
+    <string name="prompt_create_account">DON\'T HAVE AN ACCOUNT, SIGNUP NOW</string>
+    <string name="prompt_for_perms_sdk_22_and_below">Some REQUIRED permissions have not been granted</string>
+    <string name="email_already_exist">This email is already registered</string>
+    <string name="account_doesnt_exist">This email is registered. Signup Now</string>
+    <string name="username_already_exist">This username has been taken</string>
+    <string name="title_activity_crumbs">Crumbs</string>
+    <string name="day_date_and_month">Today</string>
+    <string name="previous_day_btn_text">Goto previous day</string>
+    <string name="next_day_btn_text">Goto next day</string>
+</resources>
