@@ -17,8 +17,8 @@ This journal was created for the 7day ALC 3.0 Challenge. It is works with a meta
 
 ## Acknowledgments
 * Everyone that offered assistance in **android-dev** channel
-* Everyone in **ad-team-36** and **ad-group-8
-* **Andela Learning Community
-* **Udacity** and **Google
+* Everyone in **ad-team-36** and **ad-group-8**
+* **Andela Learning Community**
+* **Udacity** and **Google**
 * *Mama
-* and ***God**.
+* and ***God***.
