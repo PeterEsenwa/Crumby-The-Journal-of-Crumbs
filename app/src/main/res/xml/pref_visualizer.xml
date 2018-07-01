@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:defaultValue="Default value"
+        android:key="@string/active_username"
+        android:selectAllOnFocus="false"
+        android:singleLine="true"
+        android:textSize="12sp"
+        android:title="Change your username" />
+    <EditTextPreference
+        android:defaultValue="Default value"
+        android:key="@string/active_useremail"
+        android:selectable="false"
+        android:singleLine="true"
+        android:textSize="12sp"
+        android:title="You are registered with" />
+    <EditTextPreference
+        android:defaultValue="Default value"
+        android:key="@string/active_userpassword"
+        android:selectAllOnFocus="false"
+        android:singleLine="true"
+        android:textSize="12sp"
+        android:title="Change password" />
+    <EditTextPreference
+        android:defaultValue="Default value"
+        android:key="@string/active_userid"
+        android:selectable="false"
+        android:singleLine="true"
+        android:title="Google ID" />
+</PreferenceScreen>

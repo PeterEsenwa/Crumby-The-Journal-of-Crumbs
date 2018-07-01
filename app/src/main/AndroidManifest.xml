@@ -34,10 +34,34 @@
         <activity
             android:name=".CrumbsActivity"
             android:label="@string/title_activity_crumbs"
+            android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".ViewCrumbs"
+            android:label="@string/title_activity_view_crumbs"
+            android:parentActivityName=".CrumbsActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CrumbsActivity" />
+            <intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".AddOrEditCrumb"
+            android:theme="@style/AddOrEditPopupStyle" />
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/action_settings"
+            android:parentActivityName=".CrumbsActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CrumbsActivity" />
         </activity>
     </application>
 

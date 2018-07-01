@@ -7,10 +7,13 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="coordinatorLayoutStyle">@style/Widget.Design.CoordinatorLayout</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
 
-    <style name="ToolbarTheme">
-        <item name="android:fontFamily">@font/firasans_light</item>
+    <style name="AddOrEditPopupStyle" parent="Theme.AppCompat.Dialog">
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowMinWidthMajor">80%</item>
+        <item name="android:windowMinWidthMinor">90%</item>
     </style>
 
     <style name="ToolbarSubtitleTheme" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Subtitle">
@@ -33,21 +36,31 @@
     <style name="NoActionBarActivity" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textColorHint">@color/colorTextPrimary</item>
     </style>
 
     <style name="TextInputLayout">
         <item name="colorControlNormal">@color/colorBtnBackgroundSecondary</item>
-
+        <item name="android:textColorHint">@color/colorTextPrimary</item>
         //added attributes
         <item name="colorControlActivated">@color/colorTextPrimary</item>
         <item name="colorControlHighlight">@color/colorTextTertiary</item>
     </style>
 
+    <style name="OtherTextInputLayout">
+        <item name="colorControlNormal">@color/colorTextTertiary</item>
+        <item name="android:textColorHint">@color/colorTextHint</item>
+        <item name="android:textColor">@color/colorAccent</item>
+        //added attributes
+        <item name="colorControlActivated">@color/colorTextTertiary</item>
+        <item name="colorControlHighlight">@color/colorTextTertiary</item>
+    </style>
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="android:preferenceStyle">@style/PreferenceThemeOverlay</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />

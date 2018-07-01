@@ -5,6 +5,7 @@
     android:id="@+id/days_recycler_holder"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     android:background="@color/colorPrimary"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".CrumbsActivity">
@@ -48,4 +49,73 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent=".3" />
 
+    <RelativeLayout
+        android:id="@+id/goto_view_crumbs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_centerInParent="true"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:contentDescription="@string/no_of_crumbs"
+            android:scaleType="fitCenter"
+            android:src="@drawable/crumbs_dark" />
+
+        <TextView
+            android:id="@+id/no_of_crumbs_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:alpha=".7"
+            android:elevation="10dp"
+            android:fontFamily="@font/firasans_bold"
+            android:textColor="@color/colorTextPrimary"
+            android:textSize="48sp"
+            tools:text="5" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/no_of_crumbs_string"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/firasans_light"
+        android:textColor="@color/colorTextPrimary"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/reminisce_textview"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/goto_view_crumbs"
+        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="We found 5 crumbs" />
+
+    <TextView
+        android:id="@+id/reminisce_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/firasans_light"
+        android:text="@string/read_or_add"
+        android:textAlignment="center"
+        android:textColor="@color/colorTextPrimary"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/no_of_crumbs_string" />
 </android.support.constraint.ConstraintLayout>

@@ -4,9 +4,11 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -17,7 +19,6 @@ import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -40,13 +41,18 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static android.Manifest.permission.INTERNET;
 import static android.Manifest.permission.READ_CONTACTS;
+import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static com.google.android.gms.auth.api.signin.GoogleSignIn.getClient;
 
 /**
@@ -61,13 +67,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private static final int REQUEST_READ_CONTACTS = 0;
     private static final int REQUEST_INTERNET_ACCESS = 10;
 
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * COMPLETED: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
     /**
      * TAG Variable for Logging Errors in the Google Sign up API
      */
@@ -85,32 +84,57 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View mProgressView;
     private View mLoginFormView;
     private GoogleSignInClient mGoogleSignInClient;
-    private int ReqCode_SIGNIN = 12;
-    private int ReqCode_SIGNUP = 13;
+    private final int ReqCode_SIGNIN = 12;
+    private final int ReqCode_SIGNUP = 13;
     private String currentAction = "LOGIN";
     private TextInputEditText mNewUserEmail;
     private TextInputEditText mNewUserPassword;
-    private TextInputEditText mNewUserRePassword;
-    private Button mEmailSignUpButton;
-    private TextView mGotoSignup;
-    private createUserTask mSignUpTask;
     private createGoogleUserTask mGoogleSignUpTask;
-    ScrollView mLoginForm;
-    ScrollView mSignUpForm;
+    private ScrollView mLoginForm;
+    private ScrollView mSignUpForm;
+    private SharedPreferences sp;
+    private Context context;
+
+    private void saveAuthenticatedUser(SharedPreferences sp, String username, String useremail, ArrayList<String> gDetails) {
+        sp.edit().remove(getString(R.string.active_useremail)).apply();
+        sp.edit().remove(getString(R.string.active_username)).apply();
+        sp.edit().remove(getString(R.string.active_userid)).apply();
+        sp.edit().remove(getString(R.string.active_userpassword)).apply();
+        sp.edit().putString(getString(R.string.active_username), username).apply();
+        sp.edit().putString(getString(R.string.active_useremail), useremail).apply();
+        sp.edit().putString(getString(R.string.active_userid), gDetails.get(0)).apply();
+    }
+
+    private void saveAuthenticatedUser(SharedPreferences sp, String username, String useremail, String password) {
+        sp.edit().remove(getString(R.string.active_useremail)).apply();
+        sp.edit().remove(getString(R.string.active_username)).apply();
+        sp.edit().remove(getString(R.string.active_userid)).apply();
+        sp.edit().remove(getString(R.string.active_userpassword)).apply();
+        sp.edit().putString(getString(R.string.active_username), username).apply();
+        sp.edit().putString(getString(R.string.active_useremail), useremail).apply();
+        sp.edit().putString(getString(R.string.active_userpassword), password).apply();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            if (!(ContextCompat.checkSelfPermission(LoginActivity.this, INTERNET) == PackageManager.PERMISSION_GRANTED)) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    requestPermissions(new String[]{INTERNET}, REQUEST_INTERNET_ACCESS);
-                } else {
-                    Toast.makeText(LoginActivity.this, R.string.prompt_for_perms_sdk_22_and_below, Toast.LENGTH_LONG).show();
-                }
+        context = getApplicationContext();
+
+        sp = getDefaultSharedPreferences(context);
+
+        // Get loggedin user, if any
+        if (!sp.getString(getString(R.string.active_username), "none").equalsIgnoreCase("none")) {
+            Intent intent = new Intent(context, CrumbsActivity.class);
+            startActivity(intent);
+            finish();
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!(checkSelfPermission(INTERNET) == PackageManager.PERMISSION_GRANTED)) {
+                requestPermissions(new String[]{INTERNET}, REQUEST_INTERNET_ACCESS);
             }
         }
+
         // Switch forms when needed
         mLoginForm = findViewById(R.id.login_form_holder);
         mSignUpForm = findViewById(R.id.signup_form_holder);
@@ -125,9 +149,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mNewUsername = findViewById(R.id.new_user_name);
         mNewUserEmail = findViewById(R.id.new_user_email);
         mNewUserPassword = findViewById(R.id.new_user_password);
-        mNewUserRePassword = findViewById(R.id.new_user_repassword);
+        TextInputEditText mNewUserRePassword = findViewById(R.id.new_user_repassword);
 
-        mEmailSignUpButton = findViewById(R.id.email_signup_button);
+        Button mEmailSignUpButton = findViewById(R.id.email_signup_button);
         mEmailSignUpButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -175,7 +199,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 mLoginForm.setVisibility(View.VISIBLE);
             }
         });
-        mGotoSignup = findViewById(R.id.goto_signup);
+        TextView mGotoSignup = findViewById(R.id.goto_signup);
         mGotoSignup.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -203,6 +227,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 if (mGoogleSignUpTask != null) {
                     return;
                 }
+                revokeAccess();
                 mLoginForm.setVisibility(View.GONE);
                 mSignUpForm.setVisibility(View.GONE);
                 signUp();
@@ -216,6 +241,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 .build();
         mGoogleSignInClient = getClient(this, gso);
     }
+
 
     private void attemptSignUp() {
         String newEmail = mNewUserEmail.getText().toString();
@@ -253,7 +279,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             ScrollView mSignUpForm = findViewById(R.id.signup_form_holder);
             mSignUpForm.setVisibility(View.GONE);
             showProgress(true);
-            mSignUpTask = new createUserTask(newUsername, newEmail, newUserPassword);
+            createUserTask mSignUpTask = new createUserTask(newUsername, newEmail, newUserPassword);
             mSignUpTask.execute((Void) null);
         }
     }
@@ -286,13 +312,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
         }
         return false;
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-//        ScrollView mLoginForm = findViewById(R.id.login_form_holder);
-//        ScrollView mSignUpForm = findViewById(R.id.signup_form_holder);
     }
 
     @Override
@@ -357,7 +376,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private void signUp() {
-        revokeAccess();
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, ReqCode_SIGNUP);
     }
@@ -424,11 +442,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
-    private void attemptLogin(String Email) {
-        Toast.makeText(LoginActivity.this, Email, Toast.LENGTH_LONG).show();
-        revokeAccess();
-    }
-
     private void revokeAccess() {
         mGoogleSignInClient.signOut()
                 .addOnCompleteListener(this, new OnCompleteListener<Void>() {
@@ -452,7 +465,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Shows the progress UI and hides the login form.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    public void showProgress(final boolean show) {
+    private void showProgress(final boolean show) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
         // for very easy animations. If available, use these APIs to fade-in
         // the progress spinner.
@@ -514,7 +527,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
         //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
         ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(LoginActivity.this,
+                new ArrayAdapter<>(context,
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
         mEmailView.setAdapter(adapter);
@@ -528,10 +541,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         };
 
         int ADDRESS = 0;
-        int IS_PRIMARY = 1;
     }
 
-    public class createGoogleUserTask extends AsyncTask<Void, Void, String> {
+    class createGoogleUserTask extends AsyncTask<Void, Void, String> {
 
         private final String mNewUserEmailString;
         private final String mNewUsernameString;
@@ -548,12 +560,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         @Override
         protected String doInBackground(Void... params) {
-            UserDatabase database = UserDatabase.getDatabase(LoginActivity.this);
+            UserDatabase database = UserDatabase.getDatabase(context);
             UserDAO userDAO = database.userDAO();
 
             checkUser = userDAO.doesEmailExists(mNewUserEmailString);
 
-            GoogleUserDB googleDB = GoogleUserDB.getINSTANCE(LoginActivity.this);
+            GoogleUserDB googleDB = GoogleUserDB.getINSTANCE(context);
             GoogleUserDAO gUserDAO = googleDB.userDAO();
 
             GoogleUser newGUser = new GoogleUser(mNewUsernameString, mNewUserEmailString, mNewUserIdString);
@@ -563,9 +575,23 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             s = "Status: " + status;*/
             if (checkUser != null || checkGoogleUser != null) {
                 Message = getString(R.string.email_already_exist);
+                revokeAccess();
             } else {
                 Message = "Success";
                 gUserDAO.newGoogleUser(newGUser);
+                ArrayList<String> gDetails = new ArrayList<>();
+                gDetails.add(newGUser.getId());
+                LoginActivity.this.saveAuthenticatedUser(sp, newGUser.getUserName(), newGUser.getUserEmail(), gDetails);
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                        .setPersistenceEnabled(true)
+                        .build();
+                db.setFirestoreSettings(settings);
+                Map<String, Object> mNewUserData = new HashMap<>();
+                mNewUserData.put("username", newGUser.getUserName());
+                mNewUserData.put("crumbs", new ArrayList<HashMap>());
+                mNewUserData.put("userID", newGUser.getId());
+                db.collection("google_users_data").document(newGUser.getUserEmail()).set(mNewUserData);
             }
             return Message;
         }
@@ -575,12 +601,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mGoogleSignUpTask = null;
             showProgress(false);
             if (Objects.equals(Status, "Success")) {
-                Intent intent = new Intent(LoginActivity.this, CrumbsActivity.class);
+                Intent intent = new Intent(context, CrumbsActivity.class);
                 startActivity(intent);
                 finish();
             } else {
                 if (Objects.equals(Status, getString(R.string.email_already_exist))) {
-                    Toast.makeText(LoginActivity.this, getString(R.string.email_already_exist), Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, getString(R.string.email_already_exist), Toast.LENGTH_LONG).show();
                     ScrollView mSignUpForm = findViewById(R.id.signup_form_holder);
                     mSignUpForm.setVisibility(View.VISIBLE);
                     //  TODO: Auto signin user
@@ -595,7 +621,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
-    public class createUserTask extends AsyncTask<Void, Void, String> {
+    class createUserTask extends AsyncTask<Void, Void, String> {
 
         private final String mNewUserEmailString;
         private final String mNewUsernameString;
@@ -612,12 +638,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         @Override
         protected String doInBackground(Void... params) {
-            UserDatabase database = UserDatabase.getDatabase(LoginActivity.this);
+            UserDatabase database = UserDatabase.getDatabase(context);
             UserDAO userDAO = database.userDAO();
 
             User newUser = new User(mNewUsernameString, mNewUserEmailString, mNewUserPasswordString);
             checkUser = userDAO.doesEmailExists(mNewUserEmailString);
-            GoogleUserDB googleDB = GoogleUserDB.getINSTANCE(LoginActivity.this);
+            GoogleUserDB googleDB = GoogleUserDB.getINSTANCE(context);
             GoogleUserDAO gUserDAO = googleDB.userDAO();
 
             GoogleUser checkGoogleUser = gUserDAO.doesEmailExists(mNewUserEmailString);
@@ -632,6 +658,18 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 else {
                     Message = "Success";
                     userDAO.createNewUser(newUser);
+
+                    LoginActivity.this.saveAuthenticatedUser(sp, newUser.getUserName(), newUser.getUserEmail(), newUser.getPassword());
+                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+                    FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                            .setPersistenceEnabled(true)
+                            .build();
+                    db.setFirestoreSettings(settings);
+                    Map<String, Object> mNewUserData = new HashMap<>();
+                    mNewUserData.put("username", newUser.getUserName());
+                    mNewUserData.put("crumbs", new ArrayList<HashMap>());
+                    mNewUserData.put("password", newUser.getPassword());
+                    db.collection("google_users_data").document(newUser.getUserEmail()).set(mNewUserData);
                 }
             }
             return Message;
@@ -641,7 +679,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected void onPostExecute(final String Status) {
             showProgress(false);
             if (Objects.equals(Status, "Success")) {
-                Intent intent = new Intent(LoginActivity.this, CrumbsActivity.class);
+                Intent intent = new Intent(context, CrumbsActivity.class);
                 startActivity(intent);
                 finish();
             } else {
@@ -662,19 +700,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
-    public class GoogleUserLoginTask extends AsyncTask<Void, Void, String> {
+    class GoogleUserLoginTask extends AsyncTask<Void, Void, String> {
         private final String mEmail;
         private final String mGoogleID;
         private String Message;
 
-        public GoogleUserLoginTask(String mEmail, String mGoogleID) {
+        GoogleUserLoginTask(String mEmail, String mGoogleID) {
             this.mEmail = mEmail;
             this.mGoogleID = mGoogleID;
         }
 
         @Override
         protected String doInBackground(Void... voids) {
-            GoogleUserDB googleDB = GoogleUserDB.getINSTANCE(LoginActivity.this);
+            GoogleUserDB googleDB = GoogleUserDB.getINSTANCE(context);
             GoogleUserDAO gUserDAO = googleDB.userDAO();
 
 //            GoogleUser User = new GoogleUser(mNewUsernameString, mNewUserEmailString, mNewUserIdString);
@@ -684,6 +722,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             s = "Status: " + status;*/
             if (checkGoogleUser != null) {
                 Message = "Success";
+                ArrayList<String> gDetails = new ArrayList<>();
+                gDetails.add(checkGoogleUser.getId());
+                LoginActivity.this.saveAuthenticatedUser(sp, checkGoogleUser.getUserName(), checkGoogleUser.getUserEmail(), gDetails);
             } else {
                 Message = getString(R.string.account_doesnt_exist);
             }
@@ -697,13 +738,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mLoginForm.setVisibility(View.VISIBLE);
 
             if (Status.equals("Success")) {
-                Toast.makeText(LoginActivity.this, "Login Succesful", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(LoginActivity.this, CrumbsActivity.class);
+                Toast.makeText(context, "Login Succesful", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(context, CrumbsActivity.class);
                 startActivity(intent);
                 finish();
             } else {
                 revokeAccess();
-                Toast.makeText(LoginActivity.this, Status, Toast.LENGTH_LONG).show();
+                Toast.makeText(context, Status, Toast.LENGTH_LONG).show();
             }
         }
 
@@ -719,7 +760,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Represents an asynchronous login task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, ng.petersabs.dev.crumby.User> {
+    class UserLoginTask extends AsyncTask<Void, Void, ng.petersabs.dev.crumby.User> {
 
         private final String mEmail;
         private final String mPassword;
@@ -731,8 +772,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         @Override
         protected ng.petersabs.dev.crumby.User doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-            UserDatabase database = UserDatabase.getDatabase(LoginActivity.this);
+            UserDatabase database = UserDatabase.getDatabase(context);
             UserDAO userDAO = database.userDAO();
 
             User user = userDAO.getUserForLogin(mEmail, mPassword);
@@ -753,11 +793,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (User != null) {
-                Intent intent = new Intent(LoginActivity.this, CrumbsActivity.class);
+                LoginActivity.this.saveAuthenticatedUser(sp, User.getUserName(), User.getUserEmail(), User.getPassword());
+                Intent intent = new Intent(context, CrumbsActivity.class);
                 startActivity(intent);
                 finish();
             } else {
-                Toast.makeText(LoginActivity.this, getString(R.string.error_incorrect_password), Toast.LENGTH_LONG).show();
+                Toast.makeText(context, getString(R.string.error_incorrect_password), Toast.LENGTH_LONG).show();
 
             }
         }
