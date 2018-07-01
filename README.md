@@ -12,6 +12,9 @@ This journal was created for the 7day ALC 3.0 Challenge. It is works with a meta
 * An Android phone (SDK >= 21)
 * Internet Connection (Not neccessary but enables online DB backup)
 
+## Release APK as of 1st July, 2018
+https://github.com/PeterEsenwa/Crumby-The-Journal-of-Crumbs/blob/master/crumby.apk
+
 ## Authors
 * Peter Esenwa https://github.com/PeterEsenwa
 
